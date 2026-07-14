@@ -1,5 +1,5 @@
 # document-extraction-pipeline
-## KI-gestützte Extraktion strukturierter Ökobilanzdaten aus Umweltproduktdeklarationen (EPDs)
+## Konzeption und Evaluation eines KI-gestützten Ansatzes zur Extraktion und Strukturierung unstrukturierter Bauproduktdaten
 
 **Begleitendes Code-Repository zur Bachelorarbeit**
 

@@ -14,13 +14,13 @@
 
 ---
 
-## Forschungsfrage
+### Forschungsfrage
 
 > *Inwiefern lässt sich die Extraktion strukturierter Ökobilanzindikatoren aus heterogen formatierten Umweltproduktdeklarationen mittels eines Zero-Shot-Prompting-Ansatzes methodisch zuverlässig automatisieren, und welchen Einfluss haben Konverterwahl und Prompt-Gestaltung auf die Extraktionsqualität?*
 
 Untersucht anhand dreier Teilfragen: (1) Einfluss der PDF-zu-Markdown-Konverterwahl und ihrer Parameteroptimierung, (2) Reduktion der Halluzinationsrate durch fehlergetriebene Prompt-Regeln und deren Konverterabhängigkeit, (3) Generalisierung von einem Trainings- auf ein unabhängiges Testkorpus.
 
-## Untersuchungsdesign
+### Untersuchungsdesign
 
 **2×2-faktorielles Design:** zwei Konverter × zwei Prompt-Stufen, alle übrigen Faktoren fixiert.
 
@@ -34,7 +34,7 @@ Untersucht anhand dreier Teilfragen: (1) Einfluss der PDF-zu-Markdown-Konverterw
 - **Zielschema:** flaches Pydantic-Schema mit **269 optionalen Feldern** (17 allgemeine Felder + 21 Indikatoren × 12 Lebenszyklusmodule nach EN 15804+A2), abgeleitet aus den DGNB-Kriterien ENV1.1–ENV1.3 und TEC1.6
 - Sämtliche Optimierungsschritte erfolgten ausschließlich auf den Trainingsdaten; das Testset wurde genau einmal, mit eingefrorenen Parametern, evaluiert
 
-## Pipeline-Architektur
+### Pipeline-Architektur
 
 ```
                                     ┌─────────────────┐
@@ -60,7 +60,7 @@ Untersucht anhand dreier Teilfragen: (1) Einfluss der PDF-zu-Markdown-Konverterw
 
 Das Pydantic-Schema wird bewusst **rein deklarativ** genutzt: Es liefert dem Extraktionsskript die Feldnamen für den Prompt und dem Evaluator die Typinformation zur Metrikauswahl. Eine Laufzeit-Validierung findet nicht statt, damit Extraktionsfehler (z. B. Koextraktion von Zahl und Einheit) sichtbar bleiben und nicht maskiert werden.
 
-## Zentrale Ergebnisse
+### Zentrale Ergebnisse
 
 ### Halluzinationsreduktion durch fehlergetriebene Prompt-Regeln (Held-out-Testset)
 
@@ -73,21 +73,21 @@ Das Pydantic-Schema wird bewusst **rein deklarativ** genutzt: Es liefert dem Ext
 
 Die acht fehlergetriebenen TELeR-Level-3-Regeln senken die Halluzinationsrate **konverterübergreifend deutlich**. Da fälschlich extrahierte Werte, anders als fehlende, nicht als Lücke erkennbar sind, ist dies der praxisrelevanteste Effekt für die Ökozertifizierung.
 
-### Dokumentierte Negativbefunde
+#### Dokumentierte Negativbefunde
 
 1. **Optuna-Konverteroptimierung (pdfplumber):** Kein Trial von 20 (TPESampler, seed=42) unterbietet die Default-Baseline. Bei sauberen, linienbasierten Vektor-PDFs erkennt pdfplumber die Tabellenstruktur bereits mit Standardwerten korrekt (kleinste inhaltstragende Zelle: 5,03 pt > Default-Toleranz 3 pt); zusätzlich ist die Zielgröße ARE strukturell blind für den tatsächlichen Wirkungsbereich des Konverters.
 2. **Konverteroptimierung (pymupdf4llm):** Strukturell nicht anwendbar — kein geeigneter kontinuierlicher Parameterraum vorhanden (fester GNN-Layoutmodus statt geometrischer Toleranzen).
 3. **Deterministisches Post-Processing (Spaltenbereinigung):** Entfernen/Verschmelzen leerer Tabellenspalten verschlechtert die Extraktion (Halluzination: 192 → 362 Fälle). Arbeitshypothese: leere Spalten dienen dem Modell als strukturelles Ausrichtungssignal zwischen Kopfzeilen und Werten.
 
-### Konverterabhängigkeit der Prompt-Wirkung (methodischer Kernbeitrag)
+#### Konverterabhängigkeit der Prompt-Wirkung (methodischer Kernbeitrag)
 
 Dieselbe, unveränderte Prompt-Regel wirkt je nach vorgelagerter Konvertierungsstufe unterschiedlich: Bei **intakter Tabellenstruktur** (pdfplumber) adressiert die label-basierte Zeilenzuordnungsregel Fehler wirksam (u. a. vollständige Auflösung einer C3/C4-Spaltenversatz-Regression); bei **strukturell verzerrtem Markdown** (pymupdf4llm, PERT/PENRT-Kernfehler) stößt dieselbe Regel an ihre Grenzen. Der wissenschaftliche Beitrag liegt nicht in der Prompt-Verbesserung selbst, sondern in der **Methodik ihrer fehlergetriebenen Ableitung** und im Nachweis dieser **eingabestrukturabhängigen Adressierbarkeit** von Extraktionsfehlern.
 
-### Generalisierungslücke
+#### Generalisierungslücke
 
 Die MARE steigt für alle vier Varianten von Training zu Test (am stärksten pdfplumber prompt optimized: 0,0079 → 0,0902). Klassisches Overfitting scheidet als Erklärung aus (keine Parameteränderung zwischen Training und Test, Optuna-Negativbefund, generische Regeln); ursächlich sind im Testset erstmals auftretende Werteausprägungen (z. B. Freitext oder „ND" in numerischen Feldern), die eine rein auf Trainingsfehlern basierende Regelableitung naturgemäß nicht antizipieren kann — dokumentiert als Grenze fehlergetriebener Prompt-Optimierung bei kleiner Stichprobe.
 
-## Evaluationsmetriken
+### Evaluationsmetriken
 
 | Metrik | Anwendung | Quelle |
 |---|---|---|
@@ -98,7 +98,7 @@ Die MARE steigt für alle vier Varianten von Training zu Test (am stärksten pdf
 
 Bekannte, dokumentierte Metrik-Limitation: ARE = 1 für alle Fälle GT = 0, Extraktion ≠ 0, unabhängig von der Größenordnung — MARE-Werte sind daher als obere Schranke zu lesen.
 
-## Ordnerstruktur
+### Ordnerstruktur
 
 ```
 document-extraction-pipeline/
@@ -142,7 +142,7 @@ document-extraction-pipeline/
     └── publisher_breakdown.py                # herausgeberspezifische Aufschlüsselung (Kap. 6.4)
 ```
 
-## Reproduktion
+### Reproduktion
 
 **Voraussetzungen:** Python ≥ 3.11, Anthropic-API-Schlüssel.
 
@@ -157,11 +157,11 @@ Alle Skripte lokalisieren den Projekt-Root zur Laufzeit selbst (Suche nach `.git
 
 **Hinweis zur Reproduzierbarkeit:** `temperature=0` macht die Extraktion nahezu, aber nicht vollständig deterministisch (Nichtassoziativität von Gleitkommaoperationen, serverseitige Batch-Effekte). Geringfügige Abweichungen einzelner Werte bei Wiederholungsläufen sind möglich.
 
-## Datenquellen (EPDs)
+### Datenquellen (EPDs)
 
 Die verwendeten EPD-PDFs sind aus Urheberrechtsgründen nicht Teil dieses Repositories (Rechte der jeweiligen Programmhalter/Deklarationsinhaber). Alle 24 Quelldokumente sind hier zur Nachvollziehbarkeit verlinkt.
 
-### Training (12 EPDs)
+#### Training (12 EPDs)
 
 | Code | Programmhalter | Produkt/Dokument | Quelle |
 |---|---|---|---|
@@ -178,7 +178,7 @@ Die verwendeten EPD-PDFs sind aus Urheberrechtsgründen nicht Teil dieses Reposi
 | `iab_03_gwf` | EPD International AB | environdec Library | [epd11052](https://environdec.com/library/epd11052) |
 | `iab_04_spc` | EPD International AB | environdec Library | [epd28962](https://www.environdec.com/library/epd28962) |
 
-### Test (12 Held-out-EPDs)
+#### Test (12 Held-out-EPDs)
 
 | Code | Programmhalter | Produkt/Dokument | Quelle |
 |---|---|---|---|
@@ -195,11 +195,11 @@ Die verwendeten EPD-PDFs sind aus Urheberrechtsgründen nicht Teil dieses Reposi
 | `iab_03_swf` | EPD International AB | environdec Library | [epd16520](https://www.environdec.com/library/epd16520) |
 | `iab_04_lvt` | EPD International AB | environdec Library | [epd28961](https://www.environdec.com/library/epd28961) |
 
-## Abgrenzung
+### Abgrenzung
 
 Dieses Repository enthält den vollständigen Quellcode der Pipeline, die Ground-Truth-Daten und die aggregierten Evaluationsergebnisse. **Nicht enthalten** sind: der Thesistext selbst, die EPD-Quell-PDFs (Rechte Dritter, siehe Verlinkung oben), Markdown-/Extraktions-Zwischenergebnisse sowie verworfene Skript-Zwischenstände aus der Entwicklungsphase.
 
-## Zitation
+### Zitation
 
 ```bibtex
 @thesis{azizi2026epd,
